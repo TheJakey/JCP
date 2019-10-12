@@ -2,19 +2,10 @@ import socket
 import json
 import cryptograph
 import sender
-import file_receiver
+from receive import file_receiver
 
-import sys
-
-MAX_PAYCHECK = 65535
-
-UDP_PORT = 5005
-
-sock = socket.socket(socket.AF_INET,     # this specifies address family - IPv4 in this case
-                     socket.SOCK_DGRAM)  # UDP
-
-sock.bind(('127.0.0.1', UDP_PORT))
-
+sock: socket
+MAX_PAYCHECK: int
 
 def get_file_data(file_data):
     result = b''
@@ -121,29 +112,40 @@ def receive_file(addr, data):
     file.write(get_file_data(file_data))
     file.close()
 
+def start_receiving():
+    fileReceiver = None
+    MAX_PAYCHECK = 65535
 
-fileReceiver = None
+    UDP_PORT = 5006
 
-while True:
-    data, addr = sock.recvfrom(1024)
-    # print("This is ADDR: ", addr)
-    # print(sys.getsizeof(data))
+    sock = socket.socket(socket.AF_INET,  # this specifies address family - IPv4 in this case
+                         socket.SOCK_DGRAM)  # UDP
 
-    # data = json.loads(data.decode())
-    data = cryptograph.decode(cryptograph, data)
+    sock.bind(('', UDP_PORT))
 
-    packet_flag = data.get('flag')
-    if (packet_flag == 'FIL' or packet_flag == 'FIE'):
-        # receive_file(addr, data)
-        if (fileReceiver == None):
-            fileReceiver = file_receiver.FileReceiver()
+    while True:
+        data, addr = sock.recvfrom(1024)
+        # print("This is ADDR: ", addr)
+        # print(sys.getsizeof(data))
 
-        fileReceiver.receive_file_packet(sock, addr, data)
+        # data = json.loads(data.decode())
+        data = cryptograph.decode(cryptograph, data)
 
-    else:
-        identifier = data.get('identifier')
-        fragmentNumber = data.get('fragmented')
-        confirmPacket(addr, identifier, fragmentNumber)
+        packet_flag = data.get('flag')
+        if (packet_flag == 'FIL' or packet_flag == 'FIE'):
+            # receive_file(addr, data)
+            if (fileReceiver == None):
+                fileReceiver = file_receiver.FileReceiver()
 
-        print('Received data: ', data.get('data'))
+            fileReceiver.receive_file_packet(sock, addr, data)
+
+            if (packet_flag == 'FIE'):
+                fileReceiver = None
+
+        else:
+            identifier = data.get('identifier')
+            fragmentNumber = data.get('fragmented')
+            confirmPacket(addr, identifier, fragmentNumber)
+
+            print('Received data: ', data.get('data'))
 

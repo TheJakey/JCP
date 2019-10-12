@@ -4,6 +4,7 @@ from file_sender import file_sender
 import socket
 import cryptograph
 import threading
+import receive.receiver
 from settings import settings
 
 class MyPrompt(Cmd):
@@ -59,7 +60,10 @@ class MyPrompt(Cmd):
             print("Bytes: ", halaluja_bytes.__sizeof__())
             print(len(halaluja))
 
-        # print("Default: {}".format(inp))
+        # print("Default: {}
+
+    def do_receive(self, inp):
+        receive_thread = threading.Thread(target=receive.receiver.start_receiving)
 
     def do_message(self, inp):
         '''
