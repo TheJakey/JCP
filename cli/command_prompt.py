@@ -63,7 +63,9 @@ class MyPrompt(Cmd):
         # print("Default: {}
 
     def do_receive(self, inp):
-        receive_thread = threading.Thread(target=receive.receiver.start_receiving)
+        receiverInstance = receive.receiver.receiver()
+        receive_thread = threading.Thread(target=receiverInstance.start_receiving)
+        receive_thread.start()
 
     def do_message(self, inp):
         '''

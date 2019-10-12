@@ -4,148 +4,152 @@ import cryptograph
 import sender
 from receive import file_receiver
 
-sock: socket
-MAX_PAYCHECK: int
+class receiver():
+    sock: socket
+    MAX_PAYCHECK: int
 
-def get_file_data(file_data):
-    result = b''
+    def __init__(self):
+        pass
 
-    for onePart in file_data:
-        result += onePart
+    def get_file_data(file_data):
+        result = b''
 
-    return result
+        for onePart in file_data:
+            result += onePart
+
+        return result
 
 
-def confirmPacket(addr, identifier, fragmentNumber):
-    sender.build_and_send(sock, identifier, 'OKE', fragmentNumber, 0, '', addr)
+    def confirmPacket(self, addr, identifier, fragmentNumber):
+        sender.build_and_send(self.sock, identifier, 'OKE', fragmentNumber, 0, '', addr)
 
-def requestFragment(addr, identifier, fragmentNumber):
-    sender.build_and_send(sock, identifier, 'MSF', fragmentNumber, 0, '', addr)
+    def requestFragment(self, addr, identifier, fragmentNumber):
+        sender.build_and_send(self.sock, identifier, 'MSF', fragmentNumber, 0, '', addr)
 
-def calculatePaycheck(message):
-    paycheckCalculated = 0
-
-    if (isinstance(message[0], int)):
-        for byte in message:
-            # result += int.from_bytes(byte, 'big') * int.from_bytes(byte, 'big')
-            paycheckCalculated += byte * byte
-    else:
-        for byte in message:
-            # result += int.from_bytes(byte, 'big') * int.from_bytes(byte, 'big')
-            paycheckCalculated += ord(byte) * ord(byte)
-
-    return paycheckCalculated % MAX_PAYCHECK
-
-def validPaycheck(data) -> bool:
-    paycheckPacket = data.get('paycheck')
-    message = data.get('data')
-    paycheckCalculated = 0
-
-    if (message != b''):
-        paycheckCalculated = calculatePaycheck(message)
-    else:
+    def calculatePaycheck(self, message):
         paycheckCalculated = 0
 
-    if (paycheckCalculated == paycheckPacket):
-        return True
-    else:
-        return False
+        if (isinstance(message[0], int)):
+            for byte in message:
+                # result += int.from_bytes(byte, 'big') * int.from_bytes(byte, 'big')
+                paycheckCalculated += byte * byte
+        else:
+            for byte in message:
+                # result += int.from_bytes(byte, 'big') * int.from_bytes(byte, 'big')
+                paycheckCalculated += ord(byte) * ord(byte)
 
-def receive_file(addr, data):
-    print('Reeiving file ... ')
+        return paycheckCalculated % self.MAX_PAYCHECK
 
-    file_data = []
-    expectedFragment = 0;
-    fragmentNumber = data.get('fragmented')
-    packet_flag = data.get('flag')
-    identifier = data.get('identifier')
+    def validPaycheck(self, data) -> bool:
+        paycheckPacket = data.get('paycheck')
+        message = data.get('data')
+        paycheckCalculated = 0
 
-    if not (validPaycheck(data)):
-        print('ERROR: INVALID PAYCHECK')
-        print("Trying to request missing fragment ", fragmentNumber)
-        requestFragment(addr, identifier, fragmentNumber)
+        if (message != b''):
+            paycheckCalculated = self.calculatePaycheck(message)
+        else:
+            paycheckCalculated = 0
 
-    if not (fragmentNumber == expectedFragment):
-        # TODO: REQUEST MISSING FRAGMENT
-        print("Trying to request missing fragment ", fragmentNumber)
-    else:
-        expectedFragment += 1
+        if (paycheckCalculated == paycheckPacket):
+            return True
+        else:
+            return False
 
-    confirmPacket(addr, identifier, fragmentNumber)
+    def receive_file(self, addr, data):
+        print('Reeiving file ... ')
 
-    file_name = data.get('data')
-    file = open(file_name, "wb+")
-
-    while packet_flag != 'FIE':  # FILE END
-        data, addr = sock.recvfrom(1024)
-        data = cryptograph.decode(cryptograph, data)
-
+        file_data = []
+        expectedFragment = 0;
         fragmentNumber = data.get('fragmented')
+        packet_flag = data.get('flag')
+        identifier = data.get('identifier')
 
-        if not (validPaycheck(data)):
+        if not (self.validPaycheck(data)):
             print('ERROR: INVALID PAYCHECK')
             print("Trying to request missing fragment ", fragmentNumber)
-            requestFragment(addr, identifier, fragmentNumber)
-            continue
+            self.requestFragment(addr, identifier, fragmentNumber)
 
-        if (fragmentNumber != expectedFragment):
+        if not (fragmentNumber == expectedFragment):
             # TODO: REQUEST MISSING FRAGMENT
             print("Trying to request missing fragment ", fragmentNumber)
-            requestFragment(addr, identifier, fragmentNumber)
-            continue
         else:
-            identifier = data.get('identifier')
             expectedFragment += 1
 
-        confirmPacket(addr, identifier, fragmentNumber)
+        self.confirmPacket(addr, identifier, fragmentNumber)
 
-        packet_flag = data.get('flag')
-        file_data.insert(fragmentNumber, data.get('data'))
-        # file_data += data.get('data')
+        file_name = data.get('data')
+        file = open(file_name, "wb+")
 
+        while packet_flag != 'FIE':  # FILE END
+            data, addr = self.sock.recvfrom(1024)
+            data = cryptograph.decode(cryptograph, data)
 
-    print('FIE received')
-
-    # file_data += data.get('data')
-    file_data.insert(fragmentNumber, data.get('data'))
-
-    file.write(get_file_data(file_data))
-    file.close()
-
-def start_receiving():
-    fileReceiver = None
-    MAX_PAYCHECK = 65535
-
-    UDP_PORT = 5006
-
-    sock = socket.socket(socket.AF_INET,  # this specifies address family - IPv4 in this case
-                         socket.SOCK_DGRAM)  # UDP
-
-    sock.bind(('', UDP_PORT))
-
-    while True:
-        data, addr = sock.recvfrom(1024)
-        # print("This is ADDR: ", addr)
-        # print(sys.getsizeof(data))
-
-        # data = json.loads(data.decode())
-        data = cryptograph.decode(cryptograph, data)
-
-        packet_flag = data.get('flag')
-        if (packet_flag == 'FIL' or packet_flag == 'FIE'):
-            # receive_file(addr, data)
-            if (fileReceiver == None):
-                fileReceiver = file_receiver.FileReceiver()
-
-            fileReceiver.receive_file_packet(sock, addr, data)
-
-            if (packet_flag == 'FIE'):
-                fileReceiver = None
-
-        else:
-            identifier = data.get('identifier')
             fragmentNumber = data.get('fragmented')
-            confirmPacket(addr, identifier, fragmentNumber)
 
-            print('Received data: ', data.get('data'))
+            if not (self.validPaycheck(data)):
+                print('ERROR: INVALID PAYCHECK')
+                print("Trying to request missing fragment ", fragmentNumber)
+                self.requestFragment(addr, identifier, fragmentNumber)
+                continue
+
+            if (fragmentNumber != expectedFragment):
+                # TODO: REQUEST MISSING FRAGMENT
+                print("Trying to request missing fragment ", fragmentNumber)
+                self.requestFragment(addr, identifier, fragmentNumber)
+                continue
+            else:
+                identifier = data.get('identifier')
+                expectedFragment += 1
+
+            self.confirmPacket(addr, identifier, fragmentNumber)
+
+            packet_flag = data.get('flag')
+            file_data.insert(fragmentNumber, data.get('data'))
+            # file_data += data.get('data')
+
+
+        print('FIE received')
+
+        # file_data += data.get('data')
+        file_data.insert(fragmentNumber, data.get('data'))
+
+        file.write(self.get_file_data(file_data))
+        file.close()
+
+    def start_receiving(self):
+        fileReceiver = None
+        MAX_PAYCHECK = 65535
+
+        UDP_PORT = 5005
+
+        self.sock = socket.socket(socket.AF_INET,  # this specifies address family - IPv4 in this case
+                             socket.SOCK_DGRAM)  # UDP
+
+        self.sock.bind(('', UDP_PORT))
+
+        while True:
+            data, addr = self.sock.recvfrom(1024)
+            # print("This is ADDR: ", addr)
+            # print(sys.getsizeof(data))
+
+            # data = json.loads(data.decode())
+            data = cryptograph.decode(cryptograph, data)
+
+            packet_flag = data.get('flag')
+            if (packet_flag == 'FIL' or packet_flag == 'FIE'):
+                # receive_file(addr, data)
+                if (fileReceiver == None):
+                    fileReceiver = file_receiver.FileReceiver()
+
+                fileReceiver.receive_file_packet(self.sock, addr, data)
+
+                if (packet_flag == 'FIE'):
+                    fileReceiver = None
+
+            else:
+                identifier = data.get('identifier')
+                fragmentNumber = data.get('fragmented')
+                self.confirmPacket(addr, identifier, fragmentNumber)
+
+                print('Received data: ', data.get('data'))
 

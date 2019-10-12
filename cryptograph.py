@@ -60,7 +60,7 @@ def decode(self, codedMessage) -> dict:
     data = codedMessage[headerLength:]
 
     if not (flag == 'FIL' or flag == 'FIE' or data == b''):
-        data.encode('cp855')
+        data = data.decode('utf-8')
 
     tcpDict = dict(
         identifier=identifier,
