@@ -17,6 +17,15 @@ class MyPrompt(Cmd):
         Opens socket IF needed, if socket is already opened, returns that one
         :return: socket
         '''
+        if (self.soc == None):
+            self.soc = socket.socket(
+                socket.AF_INET,
+                socket.SOCK_DGRAM
+            )
+            # to ensure, that the recvfrom won't be endless, if nothing is received (but ju still need to block it yourself)
+            # or use settimeout() - argument is time until timeout_exception is thrown
+            #self.soc.setblocking(True)
+
         try:
             self.soc.send( bytes('testing connection', 'UTF-8') )
         except socket.error:
@@ -26,7 +35,7 @@ class MyPrompt(Cmd):
             )
             # to ensure, that the recvfrom won't be endless, if nothing is received (but ju still need to block it yourself)
             # or use settimeout() - argument is time until timeout_exception is thrown
-            self.soc.setblocking(False)
+            #self.soc.setblocking(True)
 
         return self.soc
 

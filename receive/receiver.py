@@ -116,7 +116,7 @@ class receiver():
         file.write(self.get_file_data(file_data))
         file.close()
 
-    def get_fileReceiver_index(self, fileReceivers, packet_identifier):
+    def get_list_index(self, fileReceivers, packet_identifier):
         print('get file_receive_index triggered')
         result: int
 
@@ -136,9 +136,10 @@ class receiver():
 
     def start_receiving(self):
         fileReceivers = None
+        keepAlives = None
         MAX_PAYCHECK = 65535
 
-        UDP_PORT = 5005
+        UDP_PORT = 5006
 
         self.sock = socket.socket(socket.AF_INET,  # this specifies address family - IPv4 in this case
                              socket.SOCK_DGRAM)  # UDP
@@ -156,7 +157,7 @@ class receiver():
             packet_identifier = data.get('identifier')
             packet_flag = data.get('flag')
             if (packet_flag == 'FIL' or packet_flag == 'FIE'):
-                file_receiver_index = self.get_fileReceiver_index(fileReceivers, packet_identifier)
+                file_receiver_index = self.get_list_index(fileReceivers, packet_identifier)
 
                 fileReceivers[file_receiver_index].receive_file_packet(self.sock, addr, data)
 
@@ -164,7 +165,9 @@ class receiver():
                     fileReceiver = None
 
             elif (packet_flag == 'KIA'):
+                keepalive_index = self.get_list_index(keepAlives, packet_identifier)
 
+                pass
 
             else:
                 identifier = data.get('identifier')
