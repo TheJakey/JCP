@@ -122,12 +122,11 @@ class receiver():
     def get_list_index(self, list, packet_identifier):
         print('get list_index triggered')
 
-        if (list == None):
+        if (list == []):
             return -1
         else:
-            for index, fileReceiver in list:
+            for index, fileReceiver in enumerate(list):
                 if (packet_identifier == list[index].get_indentifier()):
-                    file_receiver_index = index
                     return index
 
             return -1
@@ -182,6 +181,6 @@ class receiver():
 
                 print('Received data: ', data.get('data'))
 
-            newKA = keepAlives.append(keep_alive.KeepAlive(self.sock))
-            keep_alive_thread = threading.Thread(target=keep_alive.KeepAlive.keep_it_alive, args=(keepAlives[0],))
-            keep_alive_thread.start()
+            # newKA = keepAlives.append(keep_alive.KeepAlive(self.sock))
+            # keep_alive_thread = threading.Thread(target=keep_alive.KeepAlive.keep_it_alive, args=(keepAlives[0],))
+            # keep_alive_thread.start()
