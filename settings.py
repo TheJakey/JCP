@@ -1,9 +1,10 @@
 class settings:
     maxFragSize = 1020
     ipAddress = '192.168.0.241'
-    port = 5005
+    target_port = 5005
+    my_port = 5006
     saveLocation = './downloads'
-    timeOutKeepAlive = 20
+    timeOutKeepAlive = 5
     UDP_HEADER = 8
     MY_HEADER = 14 + 28 + 14
     OFFSET = UDP_HEADER + MY_HEADER
