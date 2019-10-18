@@ -8,16 +8,41 @@ import receive.receiver
 from settings import settings
 
 class MyPrompt(Cmd):
+    soc = None
     prompt = socket.gethostname() + '> '
     intro = "Welcome! Type ? to list commands"
 
-    soc = socket.socket(
-        socket.AF_INET,
-        socket.SOCK_DGRAM
-    )
+    def open_socket(self) -> socket:
+        '''
+        Opens socket IF needed, if socket is already opened, returns that one
+        :return: socket
+        '''
+        if (self.soc == None):
+            self.soc = socket.socket(
+                socket.AF_INET,
+                socket.SOCK_DGRAM
+            )
+            # to ensure, that the recvfrom won't be endless, if nothing is received (but ju still need to block it yourself)
+            # or use settimeout() - argument is time until timeout_exception is thrown
+            #self.soc.setblocking(True)
+
+        try:
+            self.soc.send( bytes('testing connection', 'UTF-8') )
+        except socket.error:
+            self.soc = socket.socket(
+                socket.AF_INET,
+                socket.SOCK_DGRAM
+            )
+            # to ensure, that the recvfrom won't be endless, if nothing is received (but ju still need to block it yourself)
+            # or use settimeout() - argument is time until timeout_exception is thrown
+            #self.soc.setblocking(True)
+
+        return self.soc
 
     def do_exit(self, inp):
         '''exit the application'''
+        self.soc.shutdown(socket.SHUT_RDWR)
+        self.soc.close()
         print('Exiting.. Bye!')
         return True
 
@@ -29,13 +54,11 @@ class MyPrompt(Cmd):
         '''
         Serves for changing the default values.
         To display current defaults, just leave it WITHOUT arguments
-
         maxFragSize = maximum size of fragment
         ipAddress = destination IP address
         port = destination PORT
         savelocation = location where you want to save your downloaded files
         timeOutKeepAlive = Time until first KeepAlive packet is send
-
         :param inp: -<parameter you want to change> -<it's new value>
         :return:
         '''
@@ -76,6 +99,8 @@ class MyPrompt(Cmd):
         If any argument is missing, it will be replaced with a default value (you can change default values)
         DONT MISS THE '-' !!!
         '''
+        self.open_socket()
+
         arguments = inp.split(' -')
         message_sender(self.soc, arguments).send_message()
 
@@ -85,6 +110,8 @@ class MyPrompt(Cmd):
         :param inp: location of a file you want to send (use 'a' for default)
         :return: none
         '''
+        self.open_socket()
+
         fileSender = file_sender(self.soc, inp)
         fileThread = threading.Thread(target=fileSender.send_file)
         fileThread.start()

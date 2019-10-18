@@ -21,6 +21,7 @@ def calculatePayCheck(message) -> int:
     return result % MAX_PAYCHECK
 
 def generateIdentifier():
+    # tobytes
     identifier = ''
 
     for i in range(8):

@@ -35,7 +35,7 @@ class file_sender:
         completeMessage = sender.build_and_send(soc, identifier, 'FIL', 0, payCheck, file.name)
 
         while not (self.waitForConfirmation(soc, identifier)):
-            soc.sendto(completeMessage, (self.SETTING.get_ipAddress(), self.SETTING.get_port()))
+            soc.sendto(completeMessage, (self.SETTING.get_ipAddress(), self.SETTING.get_target_port()))
 
     def send_fragments(self, soc, identifier, file):
         lastByte = 0

@@ -2,6 +2,7 @@ import socket
 import json
 import cryptograph
 import sender
+import settings
 from receive import file_receiver
 
 class receiver():
@@ -120,12 +121,10 @@ class receiver():
         fileReceiver = None
         MAX_PAYCHECK = 65535
 
-        UDP_PORT = 5005
-
         self.sock = socket.socket(socket.AF_INET,  # this specifies address family - IPv4 in this case
                              socket.SOCK_DGRAM)  # UDP
 
-        self.sock.bind(('', UDP_PORT))
+        self.sock.bind(('', settings.settings.target_port))
 
         while True:
             data, addr = self.sock.recvfrom(1024)
