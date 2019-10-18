@@ -116,26 +116,8 @@ class receiver():
         file.write(self.get_file_data(file_data))
         file.close()
 
-    def get_fileReceiver_index(self, fileReceivers, packet_identifier):
-        print('get file_receive_index triggered')
-        result: int
-
-        if (fileReceivers == None):
-            result = -1
-        else:
-            for index, fileReceiver in fileReceivers:
-                if (packet_identifier == fileReceivers[index].get_indentifier()):
-                    file_receiver_index = index
-                    return index
-
-            result = -1
-
-        if (result == -1):
-            fileReceivers.appened(file_receiver.FileReceiver())
-            return len(fileReceivers) - 1
-
     def start_receiving(self):
-        fileReceivers = None
+        fileReceiver = None
         MAX_PAYCHECK = 65535
 
         UDP_PORT = 5005
@@ -153,18 +135,16 @@ class receiver():
             # data = json.loads(data.decode())
             data = cryptograph.decode(cryptograph, data)
 
-            packet_identifier = data.get('identifier')
             packet_flag = data.get('flag')
             if (packet_flag == 'FIL' or packet_flag == 'FIE'):
-                file_receiver_index = self.get_fileReceiver_index(fileReceivers, packet_identifier)
+                # receive_file(addr, data)
+                if (fileReceiver == None):
+                    fileReceiver = file_receiver.FileReceiver()
 
-                fileReceivers[file_receiver_index].receive_file_packet(self.sock, addr, data)
+                fileReceiver.receive_file_packet(self.sock, addr, data)
 
                 if (packet_flag == 'FIE'):
                     fileReceiver = None
-
-            elif (packet_flag == 'KIA'):
-                pass
 
             else:
                 identifier = data.get('identifier')
