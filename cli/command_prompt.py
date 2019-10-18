@@ -86,9 +86,10 @@ class MyPrompt(Cmd):
         # print("Default: {}
 
     def do_receive(self, inp):
-        receiverInstance = receive.receiver.receiver()
-        receive_thread = threading.Thread(target=receiverInstance.start_receiving)
-        receive_thread.start()
+        print('Not supported function.')
+        # receiverInstance = receive.receiver.receiver()
+        # receive_thread = threading.Thread(target=receiverInstance.start_receiving)
+        # receive_thread.start()
 
     def do_message(self, inp):
         '''
@@ -119,6 +120,10 @@ class MyPrompt(Cmd):
 
     do_EOF = do_exit
     help_EOF = help_exit
+
+receiverInstance = receive.receiver.receiver()
+receive_thread = threading.Thread(target=receiverInstance.start_receiving)
+receive_thread.start()
 
 MyPrompt().cmdloop()
 
