@@ -124,7 +124,7 @@ class receiver():
         self.sock = socket.socket(socket.AF_INET,  # this specifies address family - IPv4 in this case
                              socket.SOCK_DGRAM)  # UDP
 
-        self.sock.bind(('', settings.settings.target_port))
+        self.sock.bind(('', settings.settings.my_port))
 
         while True:
             data, addr = self.sock.recvfrom(1024)
