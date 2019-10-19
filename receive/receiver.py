@@ -108,7 +108,6 @@ class receiver():
             file_data.insert(fragmentNumber, data.get('data'))
             # file_data += data.get('data')
 
-
         print('FIE received')
 
         # file_data += data.get('data')
@@ -117,12 +116,25 @@ class receiver():
         file.write(self.get_file_data(file_data))
         file.close()
 
+    def get_list_index(self, list, packet_identifier):
+        # print('get list_index triggered')
+
+        if (list == []):
+            return -1
+        else:
+            for index, fileReceiver in enumerate(list):
+                if (packet_identifier == list[index].get_indentifier()):
+                    return index
+
+            return -1
+
     def start_receiving(self):
-        fileReceiver = None
+        fileReceivers = []
+        keepAlives = []
         MAX_PAYCHECK = 65535
 
         self.sock = socket.socket(socket.AF_INET,  # this specifies address family - IPv4 in this case
-                             socket.SOCK_DGRAM)  # UDP
+                                  socket.SOCK_DGRAM)  # UDP
 
         self.sock.bind(('', settings.settings.my_port))
 
@@ -134,16 +146,32 @@ class receiver():
             # data = json.loads(data.decode())
             data = cryptograph.decode(cryptograph, data)
 
+            packet_identifier = data.get('identifier')
             packet_flag = data.get('flag')
             if (packet_flag == 'FIL' or packet_flag == 'FIE'):
-                # receive_file(addr, data)
-                if (fileReceiver == None):
-                    fileReceiver = file_receiver.FileReceiver()
+                file_receiver_index = self.get_list_index(fileReceivers, packet_identifier)
 
-                fileReceiver.receive_file_packet(self.sock, addr, data)
+                if (file_receiver_index == -1):
+                    fileReceivers.append(file_receiver.FileReceiver())
+                    file_receiver_index = len(fileReceivers) - 1
+
+                fileReceivers[file_receiver_index].receive_file_packet(self.sock, addr, data)
 
                 if (packet_flag == 'FIE'):
-                    fileReceiver = None
+                    fileReceivers.remove(fileReceivers[file_receiver_index])
+
+            elif (packet_flag == 'KIA'):
+                pass
+                # keepalive_index = self.get_list_index(keepAlives, packet_identifier)
+                # if (keepalive_index == -1):
+                #     keepAlives.append(keep_alive.KeepAlive(self.sock))
+                #     keepalive_index = len(keepAlives) - 1
+                #
+                # if (data.get('fragmented') == 0):
+                #     keepAlives[keepalive_index].answer_request()
+                # elif (data.get('fragmented') == 1):
+                #     keepAlives[keepalive_index].confirm_keepAlive()
+
 
             else:
                 identifier = data.get('identifier')
@@ -152,3 +180,9 @@ class receiver():
 
                 print('Received data: ', data.get('data'))
 
+            # newKA = keepAlives.append(keep_alive.KeepAlive(self.sock))
+            # keep_alive_thread = threading.Thread(target=keep_alive.KeepAlive.keep_it_alive, args=(keepAlives[0],))
+            # keep_alive_thread.start()
+
+    def get_indentifier(self):
+        return self.identifier

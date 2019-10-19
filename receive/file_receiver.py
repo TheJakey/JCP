@@ -94,3 +94,9 @@ class FileReceiver():
             self.file.write(self.get_file_data(self.file_data))
             self.file.close()
             print('File Received Successfully ')
+            return 0
+
+        return 1
+
+    def get_indentifier(self):
+        return self.identifier

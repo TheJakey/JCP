@@ -58,6 +58,7 @@ class file_sender:
             # if (fragmentNumber == 3):
             #     payCheck = 6
 
+            # print('fragment send: ', fragmentNumber)
             completeMessage = sender.build_and_send(soc, identifier, flag, fragmentNumber, payCheck, message)
 
             while (self.waitForConfirmation(soc, identifier)):
