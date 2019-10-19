@@ -41,33 +41,40 @@ class file_sender:
         lastByte = 0
         max_payload = self.SETTING.get_maxFragSize() - self.SETTING.get_header_size()
         message = ' '
+        messages_list = []
         fragmentNumber = 1
 
         while message:
-            message = b'' + file.read(max_payload)
-            lastByte += message.__sizeof__() - 25
+            for i in range(0, 5):
+                message = b'' + file.read(max_payload)
+                lastByte += message.__sizeof__() - 25
 
-            if (message == b''):
-                flag = 'FIE'
-            else:
-                flag = 'FIL'
+                if (message == b''):
+                    flag = 'FIE'
+                else:
+                    flag = 'FIL'
 
-            payCheck = cryptograph.calculatePayCheck(message)
+                payCheck = cryptograph.calculatePayCheck(message)
 
-            # TODO: IMPLEMENT ERROR IN PAYCHECK BETTER
-            # if (fragmentNumber == 3):
-            #     payCheck = 6
+                # TODO: IMPLEMENT ERROR IN PAYCHECK BETTER
+                # if (fragmentNumber == 3):
+                #     payCheck = 6
 
-            # print('fragment send: ', fragmentNumber)
-            completeMessage = sender.build_and_send(soc, identifier, flag, fragmentNumber, payCheck, message)
+                # print('fragment send: ', fragmentNumber)
+                completeMessage = sender.build_and_send(soc, identifier, flag, fragmentNumber, payCheck, message)
+
+                messages_list.append(completeMessage)
+
+                # a = 2
+                # while True:
+                #     a += a
+                fragmentNumber += 1
 
             while (self.waitForConfirmation(soc, identifier)):
-                payCheck = cryptograph.calculatePayCheck(message)
-                completeMessage = sender.build_and_send(soc, identifier, flag, fragmentNumber, payCheck, message)
-            # a = 2
-            # while True:
-            #     a += a
-            fragmentNumber += 1
+                pass
+                # TODO: IMPLEMENT CHECKING HERE
+                # payCheck = cryptograph.calculatePayCheck(message)
+                # completeMessage = sender.build_and_send(soc, identifier, flag, fragmentNumber, payCheck, message)
 
     def waitForConfirmation(self, soc, identifier) -> bool:
         data, addr = soc.recvfrom(1024)

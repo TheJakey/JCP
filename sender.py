@@ -23,7 +23,6 @@ def build_and_send(soc, identifier, flag, fragmentNumber, paycheck, message, *ar
     )
 
     completeMessage = cryptograph.encode(cryptograph, tcpDict)
-    anotherMessage = cryptograph.decode(cryptograph, completeMessage)
 
     if (args.__len__() == 0):
         soc.sendto(completeMessage, (setting.get_ipAddress(), setting.get_target_port()))

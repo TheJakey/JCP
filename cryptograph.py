@@ -91,6 +91,7 @@ def encode(self, tcpDict) -> bytes:
     # encodedMessage += str(paycheck).encode('utf-8') + ' - '.encode('utf-8')
     if (isinstance(data, str)):         # encode data as well, if they ARE string
         data = data.encode()
+
     # if there is a problem with files.. try to add this AFTER tobytes convert !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     bits.frombytes(data)
     encodedMessage.extend(bits)

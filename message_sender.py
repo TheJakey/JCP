@@ -37,6 +37,7 @@ class message_sender:
     def sendNOTFragmentedMsg(self, soc):
         identifier = cryptograph.generateIdentifier()
         paycheck = cryptograph.calculatePayCheck(self.MESSAGE)
+
         completeMessage = sender.build_and_send(soc, identifier, 'MSG', 0, paycheck, self.MESSAGE)
 
         self.waitForConfirmation(soc)

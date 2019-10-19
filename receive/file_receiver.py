@@ -9,6 +9,8 @@ class FileReceiver():
         self.expectedFragment = 0
         self.identifier = ''
         self.file = None
+        self.stored_fragments = 0
+        self.missing_fragments = []
 
     def confirmPacket(self, addr, soc, identifier, fragmentNumber):
         sender.build_and_send(soc, identifier, 'OKE', fragmentNumber, 0, '', addr)
@@ -78,7 +80,11 @@ class FileReceiver():
         else:
             self.expectedFragment += 1
 
-        self.confirmPacket(addr, soc, self.identifier, fragmentNumber)
+        if (self.stored_fragments == 5):
+            self.confirmPacket(addr, soc, self.identifier, fragmentNumber)
+            self.stored_fragments = 0
+        else:
+            self.stored_fragments += 1
 
         if (self.file == None):
             if ((self.expectedFragment - 1) != 0):
@@ -86,6 +92,7 @@ class FileReceiver():
             else:
                 file_name = data.get('data')
                 self.file = open(file_name, "wb+")
+                self.confirmPacket(addr, soc, self.identifier, fragmentNumber)
                 return
 
         self.file_data.insert(fragmentNumber, data.get('data'))
@@ -94,9 +101,6 @@ class FileReceiver():
             self.file.write(self.get_file_data(self.file_data))
             self.file.close()
             print('File Received Successfully ')
-            return 0
-
-        return 1
 
     def get_indentifier(self):
         return self.identifier
