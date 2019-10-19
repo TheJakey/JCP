@@ -70,6 +70,9 @@ class MyPrompt(Cmd):
             for value in defaultValues:
                 print(value)
 
+        elif (len(arguments) == 2):
+            self.change_settinngs(arguments)
+
 
     def help_exit(self):
         print('exit the application. Shorthand: Ctrl-D.')
@@ -118,8 +121,62 @@ class MyPrompt(Cmd):
         fileThread.start()
         # file_sender(self.soc, inp).send_file()
 
+    def change_settinngs(self, arguments):
+        variable_name = arguments[0][1:]
+        new_value = arguments[1]
+
+        if (variable_name == 'maxFragSize'):
+            new_value = int(new_value)
+            if (new_value > 0 and new_value < 1490):
+                settings.maxFragSize = new_value
+            else:
+                print('Invalid value for maxFragSize. Value MUST be greater than 0 and lower then 1490...')
+            return
+
+        if (variable_name == 'ipAddress'):
+            oktets = new_value.split('.')
+            if (len(oktets) == 4):
+                settings.ipAddress = new_value
+            else:
+                print('Invalid value for ipAddress. Value MUST be in format x.x.x.x')
+            return
+
+        if (variable_name == 'target_port'):
+            new_value = int(new_value)
+
+            if (new_value > 0 and new_value < 65535):
+                settings.target_port = new_value
+            else:
+                print('Invalid value for target_port. Value MUST be greater than 0 and lower then 65535...')
+            return
+
+        if (variable_name == 'my_port'):
+            new_value = int(new_value)
+
+            if (new_value > 0 and new_value < 65535):
+                settings.my_port = new_value
+            else:
+                print('Invalid value for my_port. Value MUST be greater than 0 and lower then 65535...')
+            return
+
+        if (variable_name == 'saveLocation'):
+            settings.saveLocation = new_value
+            return
+
+        if (variable_name == 'timeOutKeepAlive'):
+            new_value = int(new_value)
+
+            if (new_value > 0 and new_value < 60):
+                settings.timeOutKeepAlive = new_value
+            else:
+                print('Invalid value for timeOutKeepAlive. Value MUST be greater than 0 and lower then 60...')
+            return
+
+
     do_EOF = do_exit
     help_EOF = help_exit
+
+
 
 receiverInstance = receive.receiver.receiver()
 receive_thread = threading.Thread(target=receiverInstance.start_receiving)

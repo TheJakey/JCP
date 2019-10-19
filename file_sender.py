@@ -1,4 +1,4 @@
-import socket
+from _socket import *
 import json
 from settings import settings
 import cryptograph
@@ -79,26 +79,30 @@ class file_sender:
 
             while (self.waitForConfirmation(soc, identifier)):
                 print('verify')
-                pass
+
                 # TODO: IMPLEMENT CHECKING HERE
                 # payCheck = cryptograph.calculatePayCheck(message)
                 # completeMessage = sender.build_and_send(soc, identifier, flag, fragmentNumber, payCheck, message)
 
     def waitForConfirmation(self, soc, identifier) -> bool:
-        data, addr = soc.recvfrom(1024)
-        data = cryptograph.decode(cryptograph, data)
+        self.soc.settimeout(10)
+        try:
+            data, addr = soc.recvfrom(1024)
+            data = cryptograph.decode(cryptograph, data)
 
-        packetIdentifier = data.get('identifier')
-        if not (identifier == packetIdentifier):
-            print('ERROR: NOT MATCHING IDENTIFIERS (identifier: ', identifier, ') !!! !!! !!!')
+            packetIdentifier = data.get('identifier')
+            if not (identifier == packetIdentifier):
+                print('ERROR: NOT MATCHING IDENTIFIERS (identifier: ', identifier, ') !!! !!! !!!')
 
-        flag = data.get('flag')
-        if (flag == 'OKE'):
-            return False
-        elif (flag == 'MSF'):
+            flag = data.get('flag')
+            if (flag == 'OKE'):
+                return False
+            elif (flag == 'MSF'):
+                return True
+            else:
+                print('ERROR: CONFIRMATION PACKET CONTAINS UNKNOWN FLAG: ', flag, " !!! !!! !!!")
+
             return True
-        else:
-            print('ERROR: CONFIRMATION PACKET CONTAINS UNKNOWN FLAG: ', flag, " !!! !!! !!!")
+        except timeout:
+            print('skaaaaaaaaaap')
 
-
-        return True
