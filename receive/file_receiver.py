@@ -61,6 +61,8 @@ class FileReceiver():
         identifier_packet = data.get('identifier')
 
         if (self.identifier == ''):
+            if (packet_flag == 'FIE'):
+                print("PACKET FLAG FIE WHEN IT SHOUDLNT")
             self.identifier = identifier_packet
             print('File receiving started!')
 
@@ -80,7 +82,7 @@ class FileReceiver():
         else:
             self.expectedFragment += 1
 
-        if (self.stored_fragments == 4):
+        if (self.stored_fragments == 49):
             self.confirmPacket(addr, soc, self.identifier, fragmentNumber)
             self.stored_fragments = 0
         else:

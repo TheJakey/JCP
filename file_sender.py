@@ -55,7 +55,7 @@ class file_sender:
                 else:
                     flag = 'FIL'
 
-                print("sending: ", fragmentNumber)
+                # print("sending: ", fragmentNumber)
 
                 payCheck = cryptograph.calculatePayCheck(message)
 
@@ -73,6 +73,7 @@ class file_sender:
                 #     a += a
                 if (flag == 'FIE'):
                     break;
+                    sending = False
                 else:
                     fragmentNumber += 1
 
