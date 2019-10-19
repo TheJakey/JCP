@@ -80,7 +80,7 @@ class FileReceiver():
         else:
             self.expectedFragment += 1
 
-        if (self.stored_fragments == 5):
+        if (self.stored_fragments == 4):
             self.confirmPacket(addr, soc, self.identifier, fragmentNumber)
             self.stored_fragments = 0
         else:

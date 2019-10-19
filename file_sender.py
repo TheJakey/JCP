@@ -43,9 +43,10 @@ class file_sender:
         message = ' '
         messages_list = []
         fragmentNumber = 1
+        sending = True
 
-        while message:
-            for i in range(0, 5):
+        while sending:
+            for i in range(0, 50):
                 message = b'' + file.read(max_payload)
                 lastByte += message.__sizeof__() - 25
 
@@ -53,6 +54,8 @@ class file_sender:
                     flag = 'FIE'
                 else:
                     flag = 'FIL'
+
+                print("sending: ", fragmentNumber)
 
                 payCheck = cryptograph.calculatePayCheck(message)
 
@@ -68,9 +71,13 @@ class file_sender:
                 # a = 2
                 # while True:
                 #     a += a
-                fragmentNumber += 1
+                if (flag == 'FIE'):
+                    break;
+                else:
+                    fragmentNumber += 1
 
             while (self.waitForConfirmation(soc, identifier)):
+                print('verify')
                 pass
                 # TODO: IMPLEMENT CHECKING HERE
                 # payCheck = cryptograph.calculatePayCheck(message)
