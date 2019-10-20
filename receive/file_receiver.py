@@ -86,6 +86,10 @@ class FileReceiver():
         packet_flag = data.get('flag')
         identifier_packet = data.get('identifier')
 
+        if (self.file == None and packet_flag == 'FIE'):
+            print('DO KOKOTA JAK SA TO???? PACKET_FLAG FIE A FILE NONE ?!?!?!??!')
+            return
+
         if (self.identifier == ''):
             # TODO: DELETE before release
             if (packet_flag == 'FIE'):
@@ -109,21 +113,14 @@ class FileReceiver():
 
         if not (fragmentNumber == self.expectedFragment):
             # TODO: REQUEST MISSING FRAGMENT
+            if (fragmentNumber == 49):
+                pass
+
             if (self.add_fragment_number_to_missing_list(fragmentNumber)):  # return 1 if fragment with that exact number already exists - so no need to store and handle it again
+                self.missing_fragments.remove(fragmentNumber)
                 return
         else:
             self.expectedFragment += 1
-
-        if (self.stored_fragments == 49):
-            self.save_buffer()
-            self.delete_old_buffer()
-            self.expectedFragment = 0   # u sure? 0 ZERO ???????????????????????????????????????????????????????
-            self.missing_fragments = []
-            self.stored_fragments = 0
-
-            self.confirmPacket(addr, soc, self.identifier, fragmentNumber)
-        else:
-            self.stored_fragments += 1
 
         if (self.file == None):
             if ((self.expectedFragment - 1) != 0):
@@ -132,13 +129,27 @@ class FileReceiver():
                 file_name = data.get('data')
                 self.file = open(file_name, "wb+")
                 self.confirmPacket(addr, soc, self.identifier, fragmentNumber)
+                self.stored_fragments += 1
                 return
 
         self.buffer.insert(fragmentNumber, data.get('data'))
         # self.file_data.insert(fragmentNumber, data.get('data'))
 
+        if (self.stored_fragments == 49):
+            self.save_buffer()
+            self.delete_old_buffer()
+            self.expectedFragment = 0   # u sure? 0 ZERO ???????????????????????????????????????????????????????
+            self.missing_fragments = []
+            self.stored_fragments = 0
+            print('Confirming packets')
+
+            self.confirmPacket(addr, soc, self.identifier, fragmentNumber)
+        else:
+            self.stored_fragments += 1
+
         if (packet_flag == 'FIE' and len(self.missing_fragments) == 0):
             self.save_buffer()
+            self.confirmPacket(addr, soc, self.identifier, fragmentNumber)
             self.file.close()
             print('File Received Successfully.... (probably) ')
 

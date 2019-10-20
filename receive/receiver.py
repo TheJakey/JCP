@@ -148,7 +148,7 @@ class receiver():
 
             packet_identifier = data.get('identifier')
             packet_flag = data.get('flag')
-            if (packet_flag == 'FIL' or packet_flag == 'FIE'):
+            if (packet_flag == 'FIL' or packet_flag == 'FIE' or packet_flag == 'MSF'):
                 file_receiver_index = self.get_list_index(fileReceivers, packet_identifier)
 
                 if (file_receiver_index == -1):

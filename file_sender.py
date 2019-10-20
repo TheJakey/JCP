@@ -25,8 +25,6 @@ class file_sender:
         identifier = cryptograph.generateIdentifier()
         print(identifier)
 
-        self.send_initial_fragment(self.soc, identifier, file)
-
         self.send_fragments(self.soc, identifier, file)
 
         file.close()
@@ -45,9 +43,15 @@ class file_sender:
         messages_list = []
         fragmentNumber = 1
         sending = True
+        initial_fragment_send = False
 
         while sending:
             for i in range(0, 50):
+                if not (initial_fragment_send):
+                    self.send_initial_fragment(self.soc, identifier, file)
+                    initial_fragment_send = True
+                    continue
+
                 message = b'' + file.read(max_payload)
                 lastByte += message.__sizeof__() - 25
 
@@ -73,8 +77,8 @@ class file_sender:
                 # while True:
                 #     a += a
                 if (flag == 'FIE'):
-                    break;
                     sending = False
+                    break;
                 else:
                     fragmentNumber += 1
 
@@ -87,6 +91,7 @@ class file_sender:
                 # TODO: IMPLEMENT CHECKING HERE
                 # payCheck = cryptograph.calculatePayCheck(message)
                 # completeMessage = sender.build_and_send(soc, identifier, flag, fragmentNumber, payCheck, message)
+            fragmentNumber = 0
 
     def waitForConfirmation(self, soc, identifier) -> bool:
         self.soc.settimeout(10)
