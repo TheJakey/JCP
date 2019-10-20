@@ -71,6 +71,10 @@ class file_sender:
                 #     payCheck = 6
 
                 # print('fragment send: ', fragmentNumber)
+
+                if (fragmentNumber == 10 and settings.sent_faulty):
+                    payCheck = 68
+
                 completeMessage = sender.build_and_send(soc, identifier, flag, fragmentNumber, payCheck, message)
 
                 messages_list.append(completeMessage)
@@ -86,24 +90,23 @@ class file_sender:
 
             while (self.waitForConfirmation(soc, identifier)):
                 print('verify')
-                # for miss_fragment in self.missing_fragments:
-                #     if (miss_fragment == ''):
-                #         for index, fragment in enumerate(messages_list):
-                #             completeMessage = messages_list.__getitem__(index)
-                #             sender.send_message(soc, completeMessage)
-                #         continue
+                for miss_fragment in self.missing_fragments:
+                    if (miss_fragment == ''):
+                        for index, fragment in enumerate(messages_list):
+                            completeMessage = messages_list.__getitem__(index)
+                            sender.send_message(soc, completeMessage)
+                        continue
                 #     completeMessage = messages_list.__getitem__(miss_fragment)
                 #     sender.send_message(soc, completeMessage)
-
-                for index, fragment in enumerate(messages_list):
-                    completeMessage = messages_list.__getitem__(index)
-                    sender.send_message(soc, completeMessage)
-                continue
+                #
+                # for index, fragment in enumerate(messages_list):
+                #     completeMessage = messages_list.__getitem__(index)
+                #     sender.send_message(soc, completeMessage)
+                # continue
 
                 # TODO: IMPLEMENT CHECKING HERE
                 # payCheck = cryptograph.calculatePayCheck(message)
                 # completeMessage = sender.build_and_send(soc, identifier, flag, fragmentNumber, payCheck, message)
-            fragmentNumber = 0
 
     def waitForConfirmation(self, soc, identifier) -> bool:
         self.soc.settimeout(20)

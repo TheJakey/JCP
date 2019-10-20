@@ -111,17 +111,16 @@ class FileReceiver():
         if not (self.validPaycheck(data)):
             print('ERROR: INVALID PAYCHECK')
             print("Trying to request missing fragment ", fragmentNumber)
-            self.requestFragment(addr, soc, self.identifier, fragmentNumber)
+            self.missing_fragments.append(fragmentNumber)
+            self.expectedFragment += 1
+            self.stored_fragments += 1
+            return
 
         if (packet_flag == 'MSF'):
             self.requestFragments(addr, soc, self.identifier)
             return
 
         if not (fragmentNumber == self.expectedFragment):
-            # TODO: REQUEST MISSING FRAGMENT
-            if (fragmentNumber == 49):
-                pass
-
             if (self.add_fragment_number_to_missing_list(fragmentNumber)):  # return 1 if fragment with that exact number already exists - so no need to store and handle it again
                 try:
                     self.missing_fragments.remove(fragmentNumber)
@@ -147,12 +146,14 @@ class FileReceiver():
         if (self.stored_fragments == 49):
             self.save_buffer()
             self.delete_old_buffer()
-            self.expectedFragment = 0   # u sure? 0 ZERO ???????????????????????????????????????????????????????
             self.missing_fragments = []
             self.stored_fragments = 0
-            print('Confirming packets')
 
-            self.confirmPacket(addr, soc, self.identifier, fragmentNumber)
+            if len(self.missing_fragments) == 0:
+                print('Confirming packets')
+                self.confirmPacket(addr, soc, self.identifier, fragmentNumber)
+            else:
+                self.requestFragments(addr, soc, self.identifier)
         else:
             self.stored_fragments += 1
 
