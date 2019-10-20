@@ -44,8 +44,11 @@ class FileReceiver():
             return 0
 
 
-    def calculatePaycheck(self, message):
+    def calculatePaycheck(self, message, data):
         paycheckCalculated = 0
+
+        if message == '':
+            return
 
         if (isinstance(message[0], int)):
             for byte in message:
@@ -64,7 +67,10 @@ class FileReceiver():
         paycheckCalculated = 0
 
         if (message != b''):
-            paycheckCalculated = self.calculatePaycheck(message)
+            if (message != ''):
+                paycheckCalculated = self.calculatePaycheck(message, data)
+            else:
+                paycheckCalculated = 0
         else:
             paycheckCalculated = 0
 
@@ -86,8 +92,8 @@ class FileReceiver():
         packet_flag = data.get('flag')
         identifier_packet = data.get('identifier')
 
-        if (self.file == None and packet_flag == 'FIE'):
-            print('DO KOKOTA JAK SA TO???? PACKET_FLAG FIE A FILE NONE ?!?!?!??!')
+        if (self.file == None and packet_flag == 'MSF'):
+            print('MSF prislo, no prvy fragment ne - file je none')
             return
 
         if (self.identifier == ''):
@@ -117,7 +123,10 @@ class FileReceiver():
                 pass
 
             if (self.add_fragment_number_to_missing_list(fragmentNumber)):  # return 1 if fragment with that exact number already exists - so no need to store and handle it again
-                self.missing_fragments.remove(fragmentNumber)
+                try:
+                    self.missing_fragments.remove(fragmentNumber)
+                except ValueError:
+                    print('not missing')
                 return
         else:
             self.expectedFragment += 1

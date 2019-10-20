@@ -11,7 +11,9 @@ class file_sender:
         self.file_location = file_location
         self.soc = soc
         self.missing_fragments = []
-        print('File Sender created.')
+        self.identifier_for_sender = cryptograph.generateIdentifier()
+
+        print('File Sender created. ', self.identifier_for_sender)
 
     def send_file(self):
         print('Sending file')
@@ -20,12 +22,11 @@ class file_sender:
         if (self.file_location == 'a'):
             self.file_location = 'quattro.jpg'
 
+        identifier = self.identifier_for_sender
+
         file = open(self.file_location, 'rb')
 
-        identifier = cryptograph.generateIdentifier()
-        print(identifier)
-
-        self.send_fragments(self.soc, identifier, file)
+        self.send_fragments(self.soc,  identifier, file)
 
         file.close()
 
@@ -34,7 +35,8 @@ class file_sender:
         completeMessage = sender.build_and_send(soc, identifier, 'FIL', 0, payCheck, file.name)
 
         while (self.waitForConfirmation(soc, identifier)):
-            soc.sendto(completeMessage, (self.SETTING.get_ipAddress(), self.SETTING.get_target_port()))
+            continue
+            # soc.sendto(completeMessage, (self.SETTING.get_ipAddress(), self.SETTING.get_target_port()))
 
     def send_fragments(self, soc, identifier, file):
         lastByte = 0
@@ -84,9 +86,19 @@ class file_sender:
 
             while (self.waitForConfirmation(soc, identifier)):
                 print('verify')
-                for miss_fragment in self.missing_fragments:
-                    completeMessage = messages_list.__getitem__(miss_fragment)
+                # for miss_fragment in self.missing_fragments:
+                #     if (miss_fragment == ''):
+                #         for index, fragment in enumerate(messages_list):
+                #             completeMessage = messages_list.__getitem__(index)
+                #             sender.send_message(soc, completeMessage)
+                #         continue
+                #     completeMessage = messages_list.__getitem__(miss_fragment)
+                #     sender.send_message(soc, completeMessage)
+
+                for index, fragment in enumerate(messages_list):
+                    completeMessage = messages_list.__getitem__(index)
                     sender.send_message(soc, completeMessage)
+                continue
 
                 # TODO: IMPLEMENT CHECKING HERE
                 # payCheck = cryptograph.calculatePayCheck(message)
@@ -94,7 +106,7 @@ class file_sender:
             fragmentNumber = 0
 
     def waitForConfirmation(self, soc, identifier) -> bool:
-        self.soc.settimeout(10)
+        self.soc.settimeout(20)
         while True:
             try:
                 data, addr = soc.recvfrom(1024)
@@ -116,6 +128,6 @@ class file_sender:
                 return True
             except timeout:
                 print('Timeout')
-                # sender.build_and_send(soc, identifier, 'MSF', 0, 0, b'')
+                sender.build_and_send(soc, identifier, 'MSF', 0, 0, '')
                 continue
 

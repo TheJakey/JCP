@@ -116,10 +116,10 @@ class MyPrompt(Cmd):
         '''
         self.open_socket()
 
-        fileSender = file_sender(self.soc, inp)
-        fileThread = threading.Thread(target=fileSender.send_file)
-        fileThread.start()
+        fileSenders.append(file_sender(self.soc, inp))
+        file_threads.append(threading.Thread(target=fileSenders[len(fileSenders) - 1].send_file).start())
         # file_sender(self.soc, inp).send_file()
+        print()
 
     def change_settinngs(self, arguments):
         variable_name = arguments[0][1:]
@@ -177,6 +177,8 @@ class MyPrompt(Cmd):
     help_EOF = help_exit
 
 
+file_threads = []
+fileSenders = []
 
 receiverInstance = receive.receiver.receiver()
 receive_thread = threading.Thread(target=receiverInstance.start_receiving)
