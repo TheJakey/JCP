@@ -37,6 +37,11 @@ class file_sender:
         while (self.waitForConfirmation(soc, identifier)):
             continue
 
+        if (self.kill_thread == True):
+            return False
+
+        return True
+
     def send_fragments(self, soc, identifier, file):
         lastByte = 0
         max_payload = settings.maxFragSize - settings.MY_HEADER
@@ -49,7 +54,8 @@ class file_sender:
         while sending:
             for i in range(0, 50):
                 if not (initial_fragment_send):
-                    self.send_initial_fragment(self.soc, identifier, file)
+                    if not (self.send_initial_fragment(self.soc, identifier, file)):
+                        return
                     initial_fragment_send = True
                     continue
 
