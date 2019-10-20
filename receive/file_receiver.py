@@ -33,13 +33,16 @@ class FileReceiver():
         # for fragment in self.buffer:
         #     if (fragment == fragmentNumber):
         #         # this fragment was already saved
-        if (self.buffer[fragmentNumber] == None):
+        try:
+            if (self.buffer[fragmentNumber] != None):
+                pass
+            print("Received fragment, thast not expected, was already stored in a buffer")
+            return 1
+        except IndexError:
             self.missing_fragments.append(fragmentNumber)
             print("Added to missing fragments: ", fragmentNumber)
             return 0
-        else:
-            print("Received fragment, thast not expected, was already stored in a buffer")
-            return 1
+
 
     def calculatePaycheck(self, message):
         paycheckCalculated = 0

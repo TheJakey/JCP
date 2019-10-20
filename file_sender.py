@@ -35,7 +35,7 @@ class file_sender:
         payCheck = cryptograph.calculatePayCheck(file.name)
         completeMessage = sender.build_and_send(soc, identifier, 'FIL', 0, payCheck, file.name)
 
-        while not (self.waitForConfirmation(soc, identifier)):
+        while (self.waitForConfirmation(soc, identifier)):
             soc.sendto(completeMessage, (self.SETTING.get_ipAddress(), self.SETTING.get_target_port()))
 
     def send_fragments(self, soc, identifier, file):
@@ -110,6 +110,7 @@ class file_sender:
 
                 return True
             except timeout:
-                sender.build_and_send(soc, identifier, 'MSF', 0, 0, b'')
+                print('Timeout')
+                # sender.build_and_send(soc, identifier, 'MSF', 0, 0, b'')
                 continue
 
