@@ -121,12 +121,13 @@ class FileReceiver():
             return
 
         if not (fragmentNumber == self.expectedFragment):
-            if (self.add_fragment_number_to_missing_list(fragmentNumber)):  # return 1 if fragment with that exact number already exists - so no need to store and handle it again
-                try:
-                    self.missing_fragments.remove(fragmentNumber)
-                except ValueError:
-                    print('not missing')
-                return
+            pass
+            # if (self.add_fragment_number_to_missing_list(fragmentNumber)):  # return 1 if fragment with that exact number already exists - so no need to store and handle it again
+            #     try:
+            #         self.missing_fragments.remove(fragmentNumber)
+            #     except ValueError:
+            #         print('not missing')
+            #     return
         else:
             self.expectedFragment += 1
 
@@ -144,16 +145,21 @@ class FileReceiver():
         # self.file_data.insert(fragmentNumber, data.get('data'))
 
         if (self.stored_fragments == 49):
-            self.save_buffer()
-            self.delete_old_buffer()
-            self.missing_fragments = []
-            self.stored_fragments = 0
-
             if len(self.missing_fragments) == 0:
                 print('Confirming packets')
                 self.confirmPacket(addr, soc, self.identifier, fragmentNumber)
             else:
                 self.requestFragments(addr, soc, self.identifier)
+                data, addr = soc.recvfrom(1024)
+                data = cryptograph.decode(cryptograph, data)
+                fragmentNumber = data.get('fragmented')
+                self.buffer.insert(fragmentNumber, data.get('data'))
+                self.confirmPacket(addr, soc, self.identifier, 0)
+
+            self.save_buffer()
+            self.delete_old_buffer()
+            self.missing_fragments = []
+            self.stored_fragments = 0
         else:
             self.stored_fragments += 1
 

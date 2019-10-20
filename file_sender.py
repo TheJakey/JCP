@@ -12,6 +12,7 @@ class file_sender:
         self.soc = soc
         self.missing_fragments = []
         self.identifier_for_sender = cryptograph.generateIdentifier()
+        self.kill_thread = False
 
         print('File Sender created. ', self.identifier_for_sender)
 
@@ -29,6 +30,8 @@ class file_sender:
         self.send_fragments(self.soc,  identifier, file)
 
         file.close()
+
+        return
 
     def send_initial_fragment(self, soc, identifier, file):
         payCheck = cryptograph.calculatePayCheck(file.name)
@@ -73,7 +76,7 @@ class file_sender:
                 # print('fragment send: ', fragmentNumber)
 
                 if (fragmentNumber == 10 and settings.sent_faulty):
-                    payCheck = 68
+                    payCheck = 0
 
                 completeMessage = sender.build_and_send(soc, identifier, flag, fragmentNumber, payCheck, message)
 
@@ -91,13 +94,14 @@ class file_sender:
             while (self.waitForConfirmation(soc, identifier)):
                 print('verify')
                 for miss_fragment in self.missing_fragments:
-                    if (miss_fragment == ''):
-                        for index, fragment in enumerate(messages_list):
-                            completeMessage = messages_list.__getitem__(index)
-                            sender.send_message(soc, completeMessage)
-                        continue
-                #     completeMessage = messages_list.__getitem__(miss_fragment)
-                #     sender.send_message(soc, completeMessage)
+                    # if (miss_fragment == ''):
+                    #     for index, fragment in enumerate(messages_list):
+                    #         completeMessage = messages_list.__getitem__(index)
+                    #         sender.send_message(soc, completeMessage)
+                    #     continue
+                    completeMessage = messages_list.__getitem__(int(miss_fragment))
+                    sender.send_message(soc, completeMessage)
+
                 #
                 # for index, fragment in enumerate(messages_list):
                 #     completeMessage = messages_list.__getitem__(index)
@@ -108,12 +112,22 @@ class file_sender:
                 # payCheck = cryptograph.calculatePayCheck(message)
                 # completeMessage = sender.build_and_send(soc, identifier, flag, fragmentNumber, payCheck, message)
 
+            if (self.kill_thread):
+                return
+
     def waitForConfirmation(self, soc, identifier) -> bool:
-        self.soc.settimeout(20)
+        self.soc.settimeout(settings.timeOutKeepAlive)
+        kia = 0
         while True:
             try:
                 data, addr = soc.recvfrom(1024)
                 data = cryptograph.decode(cryptograph, data)
+                packet_flag = data.get('flag')
+
+                if (packet_flag == 'KIA'):
+                    kia = 0
+                    continue
+
 
                 packetIdentifier = data.get('identifier')
                 if not (identifier == packetIdentifier):
@@ -131,6 +145,16 @@ class file_sender:
                 return True
             except timeout:
                 print('Timeout')
-                sender.build_and_send(soc, identifier, 'MSF', 0, 0, '')
+                sender.build_and_send(soc, identifier, 'KIA', 0, 0, '')
+
+                if (kia < 3):
+                    kia += 1
+                    print('KeepAlive send')
+                    continue
+                else:
+                    print('Connection was lost')
+                    self.kill_thread = True
+                    return False
+
                 continue
 

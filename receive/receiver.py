@@ -161,7 +161,7 @@ class receiver():
                     fileReceivers.remove(fileReceivers[file_receiver_index])
 
             elif (packet_flag == 'KIA'):
-                pass
+                sender.build_and_send(self.sock, identifier, 'KIA', 1, 0, '', addr)
                 # keepalive_index = self.get_list_index(keepAlives, packet_identifier)
                 # if (keepalive_index == -1):
                 #     keepAlives.append(keep_alive.KeepAlive(self.sock))
