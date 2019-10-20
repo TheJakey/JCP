@@ -1,5 +1,4 @@
 import socket
-import json
 import cryptograph
 import sender
 import settings
@@ -32,11 +31,9 @@ class receiver():
 
         if (isinstance(message[0], int)):
             for byte in message:
-                # result += int.from_bytes(byte, 'big') * int.from_bytes(byte, 'big')
                 paycheckCalculated += byte * byte
         else:
             for byte in message:
-                # result += int.from_bytes(byte, 'big') * int.from_bytes(byte, 'big')
                 paycheckCalculated += ord(byte) * ord(byte)
 
         return paycheckCalculated % self.MAX_PAYCHECK
@@ -110,15 +107,12 @@ class receiver():
 
         print('FIE received')
 
-        # file_data += data.get('data')
         file_data.insert(fragmentNumber, data.get('data'))
 
         file.write(self.get_file_data(file_data))
         file.close()
 
     def get_list_index(self, list, packet_identifier):
-        # print('get list_index triggered')
-
         if (list == []):
             return -1
         else:
@@ -130,19 +124,15 @@ class receiver():
 
     def start_receiving(self):
         fileReceivers = []
-        MAX_PAYCHECK = 65535
 
         self.sock = socket.socket(socket.AF_INET,  # this specifies address family - IPv4 in this case
                                   socket.SOCK_DGRAM)  # UDP
 
-        self.sock.bind(('', settings.settings.my_port))
+        print('myport: ', settings.my_port)
+        self.sock.bind(('', settings.my_port))
 
         while True:
             data, addr = self.sock.recvfrom(1480)
-            # print("This is ADDR: ", addr)
-            # print(sys.getsizeof(data))
-
-            # data = json.loads(data.decode())
             data = cryptograph.decode(cryptograph, data)
 
             packet_identifier = data.get('identifier')
@@ -161,16 +151,6 @@ class receiver():
 
             elif (packet_flag == 'KIA'):
                 sender.build_and_send(self.sock, packet_identifier, 'KIA', 1, 0, '', addr)
-                # keepalive_index = self.get_list_index(keepAlives, packet_identifier)
-                # if (keepalive_index == -1):
-                #     keepAlives.append(keep_alive.KeepAlive(self.sock))
-                #     keepalive_index = len(keepAlives) - 1
-                #
-                # if (data.get('fragmented') == 0):
-                #     keepAlives[keepalive_index].answer_request()
-                # elif (data.get('fragmented') == 1):
-                #     keepAlives[keepalive_index].confirm_keepAlive()
-
 
             else:
                 identifier = data.get('identifier')
@@ -178,10 +158,6 @@ class receiver():
                 self.confirmPacket(addr, identifier, fragmentNumber)
 
                 print('Received data: ', data.get('data'))
-
-            # newKA = keepAlives.append(keep_alive.KeepAlive(self.sock))
-            # keep_alive_thread = threading.Thread(target=keep_alive.KeepAlive.keep_it_alive, args=(keepAlives[0],))
-            # keep_alive_thread.start()
 
     def get_indentifier(self):
         return self.identifier

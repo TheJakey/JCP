@@ -1,12 +1,9 @@
-import time
 from _socket import *
-import json
-from settings import settings
+import settings
 import cryptograph
 import sender
 
 class file_sender:
-    SETTING = settings()
 
     def __init__(self, soc, file_location):
         self.file_location = file_location
@@ -20,7 +17,6 @@ class file_sender:
     def send_file(self):
         print('Sending file')
 
-        # TODO: DELETE BEFORE UPLOAD DEBUG TEST CODE
         if (self.file_location == 'a'):
             self.file_location = 'quattro.jpg'
 
@@ -40,11 +36,10 @@ class file_sender:
 
         while (self.waitForConfirmation(soc, identifier)):
             continue
-            # soc.sendto(completeMessage, (self.SETTING.get_ipAddress(), self.SETTING.get_target_port()))
 
     def send_fragments(self, soc, identifier, file):
         lastByte = 0
-        max_payload = self.SETTING.get_maxFragSize() - self.SETTING.get_header_size()
+        max_payload = settings.maxFragSize - settings.MY_HEADER
         message = ' '
         messages_list = []
         fragmentNumber = 1
@@ -66,15 +61,7 @@ class file_sender:
                 else:
                     flag = 'FIL'
 
-                # print("sending: ", fragmentNumber)
-
                 payCheck = cryptograph.calculatePayCheck(message)
-
-                # TODO: IMPLEMENT ERROR IN PAYCHECK BETTER
-                # if (fragmentNumber == 3):
-                #     payCheck = 6
-
-                # print('fragment send: ', fragmentNumber)
 
                 if (fragmentNumber == 10 and settings.sent_faulty):
                     payCheck = 0
@@ -83,9 +70,6 @@ class file_sender:
 
                 messages_list.append(completeMessage)
 
-                # a = 2
-                # while True:
-                #     a += a
                 if (flag == 'FIE'):
                     sending = False
                     break;
@@ -93,25 +77,10 @@ class file_sender:
                     fragmentNumber += 1
 
             while (self.waitForConfirmation(soc, identifier)):
-                print('verify')
+                print('Re-sending fragment')
                 for miss_fragment in self.missing_fragments:
-                    # if (miss_fragment == ''):
-                    #     for index, fragment in enumerate(messages_list):
-                    #         completeMessage = messages_list.__getitem__(index)
-                    #         sender.send_message(soc, completeMessage)
-                    #     continue
                     completeMessage = messages_list.__getitem__(int(miss_fragment))
                     sender.send_message(soc, completeMessage)
-
-                #
-                # for index, fragment in enumerate(messages_list):
-                #     completeMessage = messages_list.__getitem__(index)
-                #     sender.send_message(soc, completeMessage)
-                # continue
-
-                # TODO: IMPLEMENT CHECKING HERE
-                # payCheck = cryptograph.calculatePayCheck(message)
-                # completeMessage = sender.build_and_send(soc, identifier, flag, fragmentNumber, payCheck, message)
 
             if (self.kill_thread):
                 return
@@ -128,7 +97,6 @@ class file_sender:
                 if (packet_flag == 'KIA'):
                     kia = 0
                     continue
-
 
                 packetIdentifier = data.get('identifier')
                 if not (identifier == packetIdentifier):

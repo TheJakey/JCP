@@ -1,7 +1,5 @@
 import cryptograph
-from settings import settings
-
-setting = settings()
+import settings
 
 
 def build_and_send(soc, identifier, flag, fragmentNumber, paycheck, message, *args):
@@ -26,7 +24,7 @@ def build_and_send(soc, identifier, flag, fragmentNumber, paycheck, message, *ar
     completeMessage = cryptograph.encode(cryptograph, tcpDict)
 
     if (args.__len__() == 0):
-        soc.sendto(completeMessage, (setting.get_ipAddress(), setting.get_target_port()))
+        soc.sendto(completeMessage, (settings.ipAddress, settings.target_port))
     else:
         soc.sendto(completeMessage, (args[0]))
 
@@ -35,6 +33,6 @@ def build_and_send(soc, identifier, flag, fragmentNumber, paycheck, message, *ar
 
 def send_message(soc, completeMessage, *args):
     if (args.__len__() == 0):
-        soc.sendto(completeMessage, (setting.get_ipAddress(), setting.get_target_port()))
+        soc.sendto(completeMessage, (settings.ipAddress, settings.target_port))
     else:
         soc.sendto(completeMessage, (args[0]))

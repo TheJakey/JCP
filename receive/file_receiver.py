@@ -30,9 +30,6 @@ class FileReceiver():
         return string_of_missing_fragments[:-1]
 
     def add_fragment_number_to_missing_list(self, fragmentNumber):
-        # for fragment in self.buffer:
-        #     if (fragment == fragmentNumber):
-        #         # this fragment was already saved
         try:
             if (self.buffer[fragmentNumber] != None):
                 pass
@@ -52,11 +49,9 @@ class FileReceiver():
 
         if (isinstance(message[0], int)):
             for byte in message:
-                # result += int.from_bytes(byte, 'big') * int.from_bytes(byte, 'big')
                 paycheckCalculated += byte * byte
         else:
             for byte in message:
-                # result += int.from_bytes(byte, 'big') * int.from_bytes(byte, 'big')
                 paycheckCalculated += ord(byte) * ord(byte)
 
         return paycheckCalculated % MAX_PAYCHECK
@@ -120,16 +115,7 @@ class FileReceiver():
             self.requestFragments(addr, soc, self.identifier)
             return
 
-        if not (fragmentNumber == self.expectedFragment):
-            pass
-            # if (self.add_fragment_number_to_missing_list(fragmentNumber)):  # return 1 if fragment with that exact number already exists - so no need to store and handle it again
-            #     try:
-            #         self.missing_fragments.remove(fragmentNumber)
-            #     except ValueError:
-            #         print('not missing')
-            #     return
-        else:
-            self.expectedFragment += 1
+        self.expectedFragment += 1
 
         if (self.file == None):
             if ((self.expectedFragment - 1) != 0):
@@ -142,7 +128,6 @@ class FileReceiver():
                 return
 
         self.buffer.insert(fragmentNumber, data.get('data'))
-        # self.file_data.insert(fragmentNumber, data.get('data'))
 
         if (self.stored_fragments == 49):
             if len(self.missing_fragments) == 0:
@@ -167,7 +152,7 @@ class FileReceiver():
             self.save_buffer()
             self.confirmPacket(addr, soc, self.identifier, fragmentNumber)
             self.file.close()
-            print('File Received Successfully.... (probably) ')
+            print('File Received Successfully....')
 
     def get_indentifier(self):
         return self.identifier

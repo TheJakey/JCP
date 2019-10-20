@@ -16,7 +16,7 @@ flag_dict = dict(
 def calculatePayCheck(message) -> int:
     result = 0
 
-    if (message == b''):
+    if (message == b'' or message == ''):
         return 0
 
     if (isinstance(message[0], int)):
@@ -32,7 +32,6 @@ def calculatePayCheck(message) -> int:
     return result % MAX_PAYCHECK
 
 def generateIdentifier():
-    # tobytes
     identifier = ''
 
     for i in range(4):
@@ -82,17 +81,9 @@ def encode(self, tcpDict) -> bytes:
     encodedMessage.frombytes(paycheck.to_bytes(2, 'big'))
     # encodedMessage.extend(bits)
 
-
-
-
-    # encodedMessage = identifier.encode('utf-8') + ' - '.encode('utf-8')
-    # encodedMessage += flag.encode('utf-8') + ' - '.encode('utf-8')
-    # encodedMessage += str(frgmtd).encode('utf-8') + ' - '.encode('utf-8')
-    # encodedMessage += str(paycheck).encode('utf-8') + ' - '.encode('utf-8')
     if (isinstance(data, str)):         # encode data as well, if they ARE string
         data = data.encode()
 
-    # if there is a problem with files.. try to add this AFTER tobytes convert !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     bits.frombytes(data)
     encodedMessage.extend(bits)
 
@@ -108,29 +99,7 @@ def decode(self, codedMessage) -> dict:
     fragmented = int.from_bytes(message_bits[40:72].tobytes(), 'big')
     paycheck = int.from_bytes(message_bits[72:88].tobytes(), 'big')
 
-    # print(bits[0:32])
-    # print(bits[32:37])
-    # print(bits[37:40])
-    # print(bits[40:56])
-    # print(bits[56:72])
-    # print(bits[72:])
-    # message = bits[72:]
 
-
-
-
-
-    # decodedMessage = codedMessage.decode('cp855')
-    # arguments = decodedMessage.split(' - ', 4)
-    # headerLength = len(arguments[0]) + len(arguments[1]) + len(arguments[2]) + len(arguments[3]) + 12       # 12 becase delimiter ' - ' inside header
-    #
-    # identifier = arguments[0]
-    # flag = arguments[1]
-    # fragmented = int(arguments[2])
-    # paycheck = int(arguments[3])
-    # data = codedMessage[headerLength:]
-
-    #if not (flag == 'FIL' or flag == 'FIE' or data == b''):
     if not (flag == 'FIL' or flag == 'FIE'):
         data = message_bits[88:].tostring()
     else:

@@ -2,10 +2,9 @@ from cmd import Cmd
 from message_sender import message_sender
 from file_sender import file_sender
 import socket
-import cryptograph
 import threading
 import receive.receiver
-from settings import settings
+import settings
 
 class MyPrompt(Cmd):
     soc = None
@@ -22,9 +21,6 @@ class MyPrompt(Cmd):
                 socket.AF_INET,
                 socket.SOCK_DGRAM
             )
-            # to ensure, that the recvfrom won't be endless, if nothing is received (but ju still need to block it yourself)
-            # or use settimeout() - argument is time until timeout_exception is thrown
-            #self.soc.setblocking(True)
 
         try:
             self.soc.send( bytes('testing connection', 'UTF-8') )
@@ -33,9 +29,6 @@ class MyPrompt(Cmd):
                 socket.AF_INET,
                 socket.SOCK_DGRAM
             )
-            # to ensure, that the recvfrom won't be endless, if nothing is received (but ju still need to block it yourself)
-            # or use settimeout() - argument is time until timeout_exception is thrown
-            #self.soc.setblocking(True)
 
         return self.soc
 
@@ -65,7 +58,7 @@ class MyPrompt(Cmd):
         arguments = inp.split(' -')
         print(len(arguments))
         if (len(arguments) == 1):
-            defaultValues = settings.get_all(settings)
+            defaultValues = settings.get_all()
 
             for value in defaultValues:
                 print(value)
@@ -77,22 +70,11 @@ class MyPrompt(Cmd):
     def help_exit(self):
         print('exit the application. Shorthand: Ctrl-D.')
 
-        def do_mama(self, inp):
-            '''if you read this. U shouldn't this thing should be gone by the time u get here'''
-            cryptograph.generateIdentifier()
-            halaluja = 'mama'
-            print("String: ", halaluja.__sizeof__())
-            halaluja_bytes = halaluja.encode()
-            print("Bytes: ", halaluja_bytes.__sizeof__())
-            print(len(halaluja))
-
-        # print("Default: {}
 
     def do_receive(self, inp):
-        print('Not supported function.')
-        # receiverInstance = receive.receiver.receiver()
-        # receive_thread = threading.Thread(target=receiverInstance.start_receiving)
-        # receive_thread.start()
+        receiverInstance = receive.receiver.receiver()
+        receive_thread = threading.Thread(target=receiverInstance.start_receiving)
+        receive_thread.start()
 
     def do_message(self, inp):
         '''
@@ -172,6 +154,13 @@ class MyPrompt(Cmd):
                 print('Invalid value for timeOutKeepAlive. Value MUST be greater than 0 and lower then 60...')
             return
 
+        if (variable_name == 'sent_faulty'):
+            if (new_value == 'True' or new_value == 'true'):
+                settings.sent_faulty = True
+            elif (new_value == 'False' or new_value == 'false'):
+                settings.sent_faulty = False
+            return
+
 
     do_EOF = do_exit
     help_EOF = help_exit
@@ -180,10 +169,4 @@ class MyPrompt(Cmd):
 file_threads = []
 fileSenders = []
 
-receiverInstance = receive.receiver.receiver()
-receive_thread = threading.Thread(target=receiverInstance.start_receiving)
-receive_thread.start()
-
 MyPrompt().cmdloop()
-
-print("after")
