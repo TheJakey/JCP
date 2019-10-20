@@ -3,6 +3,7 @@ from settings import settings
 
 setting = settings()
 
+
 def build_and_send(soc, identifier, flag, fragmentNumber, paycheck, message, *args):
     '''
     Builds and sends message as UDP packet.
@@ -30,3 +31,10 @@ def build_and_send(soc, identifier, flag, fragmentNumber, paycheck, message, *ar
         soc.sendto(completeMessage, (args[0]))
 
     return completeMessage
+
+
+def send_message(soc, completeMessage, *args):
+    if (args.__len__() == 0):
+        soc.sendto(completeMessage, (setting.get_ipAddress(), setting.get_target_port()))
+    else:
+        soc.sendto(completeMessage, (args[0]))

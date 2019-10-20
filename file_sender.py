@@ -10,6 +10,7 @@ class file_sender:
     def __init__(self, soc, file_location):
         self.file_location = file_location
         self.soc = soc
+        self.missing_fragments = []
         print('File Sender created.')
 
     def send_file(self):
@@ -79,6 +80,9 @@ class file_sender:
 
             while (self.waitForConfirmation(soc, identifier)):
                 print('verify')
+                for miss_fragment in self.missing_fragments:
+                    completeMessage = messages_list.__getitem__(miss_fragment)
+                    sender.send_message(soc, completeMessage)
 
                 # TODO: IMPLEMENT CHECKING HERE
                 # payCheck = cryptograph.calculatePayCheck(message)
@@ -86,23 +90,26 @@ class file_sender:
 
     def waitForConfirmation(self, soc, identifier) -> bool:
         self.soc.settimeout(10)
-        try:
-            data, addr = soc.recvfrom(1024)
-            data = cryptograph.decode(cryptograph, data)
+        while True:
+            try:
+                data, addr = soc.recvfrom(1024)
+                data = cryptograph.decode(cryptograph, data)
 
-            packetIdentifier = data.get('identifier')
-            if not (identifier == packetIdentifier):
-                print('ERROR: NOT MATCHING IDENTIFIERS (identifier: ', identifier, ') !!! !!! !!!')
+                packetIdentifier = data.get('identifier')
+                if not (identifier == packetIdentifier):
+                    print('ERROR: NOT MATCHING IDENTIFIERS (identifier: ', identifier, ') !!! !!! !!!')
 
-            flag = data.get('flag')
-            if (flag == 'OKE'):
-                return False
-            elif (flag == 'MSF'):
+                flag = data.get('flag')
+                if (flag == 'OKE'):
+                    return False
+                elif (flag == 'MSF'):
+                    self.missing_fragments = data.get('data').split('-')
+                    return True
+                else:
+                    print('ERROR: CONFIRMATION PACKET CONTAINS UNKNOWN FLAG: ', flag, " !!! !!! !!!")
+
                 return True
-            else:
-                print('ERROR: CONFIRMATION PACKET CONTAINS UNKNOWN FLAG: ', flag, " !!! !!! !!!")
-
-            return True
-        except timeout:
-            print('skaaaaaaaaaap')
+            except timeout:
+                sender.build_and_send(soc, identifier, 'MSF', 0, 0, b'')
+                continue
 
