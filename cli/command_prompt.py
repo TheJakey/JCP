@@ -10,6 +10,7 @@ class MyPrompt(Cmd):
     soc = None
     prompt = socket.gethostname() + '> '
     intro = "Welcome! Type ? to list commands"
+    receiver_instance = None
 
     def open_socket(self) -> socket:
         '''
@@ -72,9 +73,12 @@ class MyPrompt(Cmd):
 
 
     def do_receive(self, inp):
-        receiverInstance = receive.receiver.receiver()
-        receive_thread = threading.Thread(target=receiverInstance.start_receiving)
-        receive_thread.start()
+        if (self.receiver_instance == None):
+            self.receiver_instance = receive.receiver.receiver()
+            receive_thread = threading.Thread(target=self.receiver_instance.start_receiving)
+            receive_thread.start()
+        else:
+            print('Receiver already running.')
 
     def do_message(self, inp):
         '''

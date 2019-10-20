@@ -72,6 +72,7 @@ class file_sender:
 
                 if (flag == 'FIE'):
                     sending = False
+                    print('File sent')
                     break;
                 else:
                     fragmentNumber += 1

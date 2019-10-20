@@ -1,5 +1,6 @@
 import sender
 import cryptograph
+import settings
 
 MAX_PAYCHECK = 65535
 
@@ -122,7 +123,8 @@ class FileReceiver():
                 print('ERROR: Could not open FILE ')
             else:
                 file_name = data.get('data')
-                self.file = open(file_name, "wb+")
+                self.save_to = settings.saveLocation + file_name.decode()
+                self.file = open(self.save_to, "wb+")
                 self.confirmPacket(addr, soc, self.identifier, fragmentNumber)
                 self.stored_fragments += 1
                 return
@@ -153,6 +155,7 @@ class FileReceiver():
             self.confirmPacket(addr, soc, self.identifier, fragmentNumber)
             self.file.close()
             print('File Received Successfully....')
+            print('save location: ', self.save_to)
 
     def get_indentifier(self):
         return self.identifier
