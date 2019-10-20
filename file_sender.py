@@ -1,3 +1,4 @@
+import time
 from _socket import *
 import json
 from settings import settings
@@ -157,4 +158,8 @@ class file_sender:
                     return False
 
                 continue
+            except ConnectionResetError:
+                print('Connection was lost')
+                self.kill_thread = True
+                return False
 

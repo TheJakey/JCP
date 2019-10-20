@@ -130,7 +130,6 @@ class receiver():
 
     def start_receiving(self):
         fileReceivers = []
-        keepAlives = []
         MAX_PAYCHECK = 65535
 
         self.sock = socket.socket(socket.AF_INET,  # this specifies address family - IPv4 in this case
@@ -139,7 +138,7 @@ class receiver():
         self.sock.bind(('', settings.settings.my_port))
 
         while True:
-            data, addr = self.sock.recvfrom(1024)
+            data, addr = self.sock.recvfrom(1480)
             # print("This is ADDR: ", addr)
             # print(sys.getsizeof(data))
 
@@ -161,7 +160,7 @@ class receiver():
                     fileReceivers.remove(fileReceivers[file_receiver_index])
 
             elif (packet_flag == 'KIA'):
-                sender.build_and_send(self.sock, identifier, 'KIA', 1, 0, '', addr)
+                sender.build_and_send(self.sock, packet_identifier, 'KIA', 1, 0, '', addr)
                 # keepalive_index = self.get_list_index(keepAlives, packet_identifier)
                 # if (keepalive_index == -1):
                 #     keepAlives.append(keep_alive.KeepAlive(self.sock))

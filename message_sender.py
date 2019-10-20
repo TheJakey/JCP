@@ -28,7 +28,7 @@ class message_sender:
 
     def send_message(self):
         # check if fragmenting is needed
-        if (sys.getsizeof(self.MESSAGE) + self.setting.get_header_size() > self.setting.get_maxFragSize()):
+        if (len(self.MESSAGE) + self.setting.get_header_size() > self.setting.get_maxFragSize()):
             print("Fragmenting . . .")
             self.sendFragmentedMsg(self.soc)
         else:
@@ -46,7 +46,7 @@ class message_sender:
         sequenceNumber = 0
         # lastByte = self.setting.get_maxFragSize() - self.OFFSET - 1  # -1 'cause i need to get to LAST BYTE not the following one
         lastByte = 0
-        unsentMessageSize = sys.getsizeof(self.MESSAGE)
+        unsentMessageSize = len(self.MESSAGE)
         identifier = cryptograph.generateIdentifier()
         fragmentNumber = 0
 
@@ -57,7 +57,8 @@ class message_sender:
 
             completeMessage = sender.build_and_send(soc, identifier, 'FGM', fragmentNumber, paycheck, self.MESSAGE[lastByte:newLastByte])
 
-            unsentMessageSize -= lastByte
+            unsentMessageSize -= newLastByte - lastByte
+            lastByte += newLastByte
 
             self.waitForConfirmation(soc)
 

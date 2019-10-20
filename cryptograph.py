@@ -75,7 +75,7 @@ def encode(self, tcpDict) -> bytes:
     encodedMessage.extend('000')
 
     # fragmented
-    encodedMessage.frombytes(frgmtd.to_bytes(2, 'big'))
+    encodedMessage.frombytes(frgmtd.to_bytes(4, 'big'))
     # encodedMessage.extend(bits)
 
     # paycheck
@@ -105,8 +105,8 @@ def decode(self, codedMessage) -> dict:
     identifier = message_bits[0:32].tostring()
     flag = get_flag_from_bits(message_bits[32:37])
     message_bits[37:40] # reserved not used
-    fragmented = int.from_bytes(message_bits[40:56].tobytes(), 'big')
-    paycheck = int.from_bytes(message_bits[56:72].tobytes(), 'big')
+    fragmented = int.from_bytes(message_bits[40:72].tobytes(), 'big')
+    paycheck = int.from_bytes(message_bits[72:88].tobytes(), 'big')
 
     # print(bits[0:32])
     # print(bits[32:37])
@@ -132,9 +132,9 @@ def decode(self, codedMessage) -> dict:
 
     #if not (flag == 'FIL' or flag == 'FIE' or data == b''):
     if not (flag == 'FIL' or flag == 'FIE'):
-        data = message_bits[72:].tostring()
+        data = message_bits[88:].tostring()
     else:
-        data = message_bits[72:].tobytes()
+        data = message_bits[88:].tobytes()
 
     tcpDict = dict(
         identifier=identifier,
