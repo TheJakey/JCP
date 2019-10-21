@@ -33,16 +33,26 @@ class message_sender:
         fragmentNumber = 0
 
         while (unsentMessageSize > 0):
-            newLastByte = lastByte + settings.maxFragSize - settings.MY_HEADER
+            newLastByte = lastByte + settings.maxFragSize
 
             paycheck = cryptograph.calculatePayCheck(self.MESSAGE[lastByte:newLastByte])
 
-            completeMessage = sender.build_and_send(soc, identifier, 'FGM', fragmentNumber, paycheck, self.MESSAGE[lastByte:newLastByte])
+            # completeMessage = sender.build_and_send(soc, identifier, 'FGM', fragmentNumber, paycheck, self.MESSAGE[lastByte:newLastByte])
+
+            new_flag = 'FGM'
+            if (unsentMessageSize - newLastByte - lastByte <= 0):
+                new_flag = 'FGE'
+
+            if (fragmentNumber % 2 == 0):
+                completeMessage = sender.build_and_send(soc, identifier, new_flag, fragmentNumber, paycheck,
+                                                        self.MESSAGE[lastByte:newLastByte])
+                self.waitForConfirmation(soc)
+
+
 
             unsentMessageSize -= newLastByte - lastByte
             lastByte = newLastByte
 
-            self.waitForConfirmation(soc)
 
             fragmentNumber += 1
 

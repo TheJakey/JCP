@@ -10,7 +10,8 @@ flag_dict = dict(
         MSF='00011',
         OKE='00100',
         FIL='00101',
-        FIE='00110'
+        FIE='00110',
+        FGE='00111'
     )
 
 def calculatePayCheck(message) -> int:

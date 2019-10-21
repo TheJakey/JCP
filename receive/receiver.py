@@ -124,6 +124,7 @@ class receiver():
 
     def start_receiving(self):
         fileReceivers = []
+        buffer_message = []
 
         self.sock = socket.socket(socket.AF_INET,  # this specifies address family - IPv4 in this case
                                   socket.SOCK_DGRAM)  # UDP
@@ -151,6 +152,15 @@ class receiver():
 
             elif (packet_flag == 'KIA'):
                 sender.build_and_send(self.sock, packet_identifier, 'KIA', 1, 0, '', addr)
+
+            elif (packet_flag == 'FGM'):
+                buffer_message.append(data.get('data'))
+
+            elif (packet_flag == 'FGE'):
+                buffer_message.append(data.get('data'))
+                for fragment in buffer_message:
+                    print(fragment, end="")
+                buffer_message.clear()
 
             else:
                 identifier = data.get('identifier')

@@ -113,7 +113,7 @@ class MyPrompt(Cmd):
 
         if (variable_name == 'maxFragSize'):
             new_value = int(new_value)
-            if (new_value > 11 and new_value < 1473):
+            if (new_value > 0 and new_value < 1473):
                 settings.maxFragSize = new_value
             else:
                 print('Invalid value for maxFragSize. Value MUST be greater than 0 and lower then 1490...')
