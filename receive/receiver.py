@@ -154,13 +154,19 @@ class receiver():
                 sender.build_and_send(self.sock, packet_identifier, 'KIA', 1, 0, '', addr)
 
             elif (packet_flag == 'FGM'):
+                identifier = data.get('identifier')
+                fragmentNumber = data.get('fragmented')
                 buffer_message.append(data.get('data'))
+                self.confirmPacket(addr, identifier, fragmentNumber)
 
             elif (packet_flag == 'FGE'):
+                identifier = data.get('identifier')
+                fragmentNumber = data.get('fragmented')
                 buffer_message.append(data.get('data'))
                 for fragment in buffer_message:
                     print(fragment, end="")
                 buffer_message.clear()
+                self.confirmPacket(addr, identifier, fragmentNumber)
 
             else:
                 identifier = data.get('identifier')

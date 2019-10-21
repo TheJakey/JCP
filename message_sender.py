@@ -44,8 +44,7 @@ class message_sender:
                 new_flag = 'FGE'
 
             if (fragmentNumber % 2 == 0):
-                completeMessage = sender.build_and_send(soc, identifier, new_flag, fragmentNumber, paycheck,
-                                                        self.MESSAGE[lastByte:newLastByte])
+                completeMessage = sender.build_and_send(soc, identifier, new_flag, fragmentNumber, paycheck, self.MESSAGE[lastByte:newLastByte])
                 self.waitForConfirmation(soc)
 
 
