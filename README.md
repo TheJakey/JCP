@@ -1,6 +1,10 @@
 # JCP
 
-JCP is Jakes Communication Protocol.
-This is build on UDP and serves for educational purposes. 
+JCP is Jake's Communication Protocol.
+This protocol is on Application layer under UDP and implements some of the TCP features. 
 
-If anyone will see this: If you find some BUG. Just hit me up at: jakub.marincic@gmail.com I'll appreciate ^_^
+Serves for educational purposes.
+
+If you are so bored, that you are reading this code, consider different activity. If you are still about to read it,
+let me know your thoughts. I would love to hear some feedback, either good or bad. 
+
