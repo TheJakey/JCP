@@ -15,6 +15,21 @@ flag_dict = dict(
     )
 
 def calculatePayCheck(message) -> int:
+    """
+    Paycheck - something like checkSum implemented only on payload (first misunderstanding of this concept)
+    Function calculates value and returns result as int
+
+    Since it only calculates payCheck value from payload, it's kinda useless, it wont be able to detect a defect
+    in header made during data transfer
+
+    Also used approach to calculate a payCheck value is just stupid
+
+    IMPORTANT!!
+    This will be removed, feel free to ignore it's existence
+
+    :param message: a message to be transferred to int in range 0 - MAX_PAYCHECK
+    :return:
+    """
     result = 0
 
     if (message == b'' or message == ''):
@@ -32,19 +47,40 @@ def calculatePayCheck(message) -> int:
 
     return result % MAX_PAYCHECK
 
-def generateIdentifier():
+def generateIdentifier() -> str:
+    """
+    Creates message identifier
+    this is made to recognize message type
+
+    identifier - few chars made to identify message, stays the same across all messages of one transfer (one file,
+                longer text message, ...)
+
+    :return: identifier
+    """
+
     identifier = ''
 
     for i in range(4):
+        # TODO: change range, so there is less waste of space OR more different identifiers !!
         randomNum = random.randint(33, 126) #the range of numbers is set 33 - 126 cause i need to skip characters like new line, space, del ...
         identifier += chr(randomNum)
 
     return identifier
 
 def get_bits_from_flag(flag) -> bitarray:
+    """
+    Translates flag string to it's bits value
+    :param flag: 3 char long name of flag
+    :return: bits matching given flag
+    """
     return flag_dict.get(flag)
 
 def get_flag_from_bits(flag_bits):
+    """
+    Translates flag bits to corresponding string
+    :param flag_bits: flag in bitarray variable
+    :return: corresponding string to given bitarray
+    """
     flag_bits = flag_bits.unpack(zero=b'0', one=b'1')
     flag_bits = flag_bits.decode()
 

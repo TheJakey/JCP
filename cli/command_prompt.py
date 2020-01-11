@@ -7,9 +7,12 @@ import receive.receiver
 import settings
 
 class MyPrompt(Cmd):
+    # Socket that is used to send data
     soc = None
-    prompt = socket.gethostname() + '> '
+    host_name = socket.gethostname() + '> '
     intro = "Welcome! Type ? to list commands"
+    # TODO: reconsider this
+    # stores instance of receiver
     receiver_instance = None
 
     def open_socket(self) -> socket:
@@ -40,10 +43,6 @@ class MyPrompt(Cmd):
         print('Exiting.. Bye!')
         return True
 
-    def do_add(self, inp):
-        '''if you read this. U shouldn't this thing should be gone by the time u get here'''
-        print("Adding '{}'".format(inp))
-
     def do_default(self, inp):
         '''
         Serves for changing the default values.
@@ -73,6 +72,10 @@ class MyPrompt(Cmd):
 
 
     def do_receive(self, inp):
+        """
+        Function creates and starts receiving thread
+        :param inp:
+        """
         if (self.receiver_instance == None):
             self.receiver_instance = receive.receiver.receiver()
             receive_thread = threading.Thread(target=self.receiver_instance.start_receiving)
@@ -82,12 +85,12 @@ class MyPrompt(Cmd):
 
     def do_message(self, inp):
         '''
-        send message
+        sends message taken as argument
         valid formats:  message <your_message>
                         message <your_message> -<target_IP>
                         message <your_message> -<target_IP> -<target_PORT>
         If any argument is missing, it will be replaced with a default value (you can change default values)
-        DONT MISS THE '-' !!!
+        DONT FORGET THE '-' !!!
         '''
         self.open_socket()
 
@@ -96,7 +99,7 @@ class MyPrompt(Cmd):
 
     def do_file(self, inp):
         '''
-        Function will send a file
+        Function will send a file from a separate thread
         :param inp: location of a file you want to send (use 'a' for default)
         :return: none
         '''
@@ -108,9 +111,20 @@ class MyPrompt(Cmd):
         print()
 
     def change_settinngs(self, arguments):
+        """
+        Function serves to change default values loaded in settings.py
+        :param arguments: value you want to change and its new value
+        :return:
+        """
+
+        #
+        # TODO: make this to load settings from file
+        #
+
         variable_name = arguments[0][1:]
         new_value = arguments[1]
 
+        # this is just 'switch' for every value in settings
         if (variable_name == 'maxFragSize'):
             new_value = int(new_value)
             if (new_value > 0 and new_value < 1473):
@@ -169,8 +183,11 @@ class MyPrompt(Cmd):
     do_EOF = do_exit
     help_EOF = help_exit
 
-
+# list of threads - every file is send in a separate one, these are stored here
 file_threads = []
+# TODO: is it even needed (now/future)?
+# list of fileSender instances - may have use in future
 fileSenders = []
 
+# starts commandline
 MyPrompt().cmdloop()
